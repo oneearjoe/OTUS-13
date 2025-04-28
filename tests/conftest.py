@@ -7,7 +7,7 @@ def pytest_addoption(parser):
         "--browser",
         action="store",
         default="chrome",
-        help="Browser to run tests (chrome, firefox)",
+        help="Browser to run tests (chrome, edge, firefox)",
     )
     parser.addoption(
         "--url",
@@ -24,6 +24,8 @@ def browser(request):
 
     if browser_name == "chrome":
         driver = webdriver.Chrome()
+    elif browser_name == "edge":
+        driver = webdriver.Edge()
     elif browser_name == "firefox":
         driver = webdriver.Firefox()
 
