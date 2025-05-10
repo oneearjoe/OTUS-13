@@ -1,3 +1,4 @@
+import allure
 from page_object.alerts import Alerts
 from page_object.cart_page import CartPage
 from page_object.catalog_page import CatalogPage
@@ -6,12 +7,14 @@ from page_object.product_page import ProductPage
 from page_object.registration_page import RegistrationPage
 
 
+@allure.title("Регистрация нового пользователя")
 def test_user_registration(browser):
     RegistrationPage(browser).open_registration_page()
     RegistrationPage(browser).fill_in_reg_form()
     RegistrationPage(browser).is_success_register_message()
 
 
+@allure.title("Добавления товара в корзину")
 def test_add_to_cart(browser):
     MainPage(browser).open_main_page()
     MainPage(browser).get_product_on_main_page()
@@ -22,6 +25,7 @@ def test_add_to_cart(browser):
     CartPage(browser).check_product_quantity_in_cart()
 
 
+@allure.title("Смена валюты")
 def test_currency_switch(browser):
     MainPage(browser).open_main_page()
     MainPage(browser).click_currency_dropdown()
