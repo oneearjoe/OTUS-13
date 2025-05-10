@@ -1,13 +1,17 @@
+import allure
+import pytest
 
 from page_object.admin_page import AdminPage
 
 
+@allure.title("Пользователь может залогиниться в админку и разлогиниться")
 def test_admin_login_logout(browser):
     AdminPage(browser).open_admin_page()
     AdminPage(browser).login()
     AdminPage(browser).logout()
 
 
+@allure.title("Добавление нового продукта через админку")
 def test_add_new_product_in_admin(browser):
     name = "Test"
     AdminPage(browser).open_admin_page()
@@ -19,6 +23,7 @@ def test_add_new_product_in_admin(browser):
     AdminPage(browser).delete_product()
 
 
+@allure.title("Удаление продута через админку")
 def test_remove_product_in_admin(browser):
     name = "Test1"
     AdminPage(browser).open_admin_page()
