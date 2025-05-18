@@ -3,7 +3,6 @@ import logging
 import datetime
 import allure
 import json
-
 from selenium import webdriver
 
 
@@ -31,9 +30,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture
-def browser(request):
-    browser_name = request.config.getoption("--browser")
-    base_url = request.config.getoption("--url")
+def logger(request):
     log_level = request.config.getoption("--log_level")
 
     logger = logging.getLogger(request.node.name)
@@ -45,6 +42,30 @@ def browser(request):
     logger.info(
         "=====> Test %s started %s" % (request.node.name, datetime.datetime.now())
     )
+
+    yield logger
+
+    logger.info(
+        "=====> Test %s finished %s" % (request.node.name, datetime.datetime.now())
+    )
+
+
+@pytest.fixture(autouse=True)
+def allure_report(request, browser):
+    yield
+
+    if request.node.rep_call.failed:
+        allure.attach(
+            browser.get_screenshot_as_png(),
+            name=request.function.__name__,
+            attachment_type=allure.attachment_type.PNG,
+        )
+
+
+@pytest.fixture
+def browser(request, logger):
+    browser_name = request.config.getoption("--browser")
+    base_url = request.config.getoption("--url")
 
     if browser_name == "chrome":
         driver = webdriver.Chrome()
@@ -71,11 +92,7 @@ def browser(request):
 
     yield driver
 
-    if request.node.rep_call.failed:
-        allure.attach(
-            driver.get_screenshot_as_png(),
-            name=request.function.__name__,
-            attachment_type=allure.attachment_type.PNG,
-        )
-
+    logger.info(
+        "=====> Browser %s closed at %s" % (request.node.name, datetime.datetime.now())
+    )
     driver.quit()
