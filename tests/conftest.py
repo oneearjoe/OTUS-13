@@ -4,12 +4,18 @@ import datetime
 import allure
 import json
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.edge.options import Options as EdgeOptions
+
 
 
 def pytest_addoption(parser):
     parser.addoption("--browser", default="chrome", help="Browser to run tests (chrome, edge, firefox)")
     parser.addoption("--url", default="http://192.168.1.105:8081/", help="Base OpenCart URL")
     parser.addoption("--log_level", default="INFO")
+    parser.addoption("--selenoid_url", default="http://77.244.221.82/wd/hub")
+    parser.addoption("--remote", action="store_true", help="Run tests on Selenoid")
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
@@ -56,17 +62,39 @@ def logger(request):
     )
 
 
+
+
 @pytest.fixture
 def browser(request, logger):
     browser_name = request.config.getoption("--browser")
     base_url = request.config.getoption("--url")
+    selenoid_url = request.config.getoption("--selenoid_url")
+    remote = request.config.getoption("--remote")
 
-    if browser_name == "chrome":
-        driver = webdriver.Chrome()
-    elif browser_name == "edge":
-        driver = webdriver.Edge()
-    elif browser_name == "firefox":
-        driver = webdriver.Firefox()
+    if remote:
+
+        if browser_name == "chrome":
+            options = ChromeOptions()
+        elif browser_name == "firefox":
+            options = FirefoxOptions()
+        elif browser_name == "edge":
+            options = EdgeOptions()
+
+
+        options.set_capability("browserName", browser_name)
+
+        driver = webdriver.Remote(
+            command_executor=selenoid_url,
+            options=options
+        )
+    else:
+        if browser_name == "chrome":
+            driver = webdriver.Chrome()
+        elif browser_name == "edge":
+            driver = webdriver.Edge()
+        elif browser_name == "firefox":
+            driver = webdriver.Firefox()
+
 
     driver.logger = logger
     driver.test_name = request.node.name
